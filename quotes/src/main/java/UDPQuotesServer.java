@@ -9,26 +9,29 @@ import java.net.SocketException;
  */
 public class UDPQuotesServer {
 
-    public static final String usage = "Usage : java UDPQuotesServer <port>";
+    public static final String USAGE = "Usage : java UDPQuotesServer <port>";
     private static final int BUFSIZE = 1024;
-    private static final String filename = "quotes";
+    private static final String FILENAME = "quotes";
 
     public static void main(String[] args) {
         if (args.length != 1) {
-            System.err.println(usage);
+            System.err.println(USAGE);
+            return;
         }
 
         int localPort = Integer.parseInt(args[0]);
-        BufferedReader br = null;
 
-        try (DatagramSocket dSocket = new DatagramSocket(localPort)){
+
+        try (DatagramSocket dSocket = new DatagramSocket(localPort)) {
             byte[] receivedData = new byte[BUFSIZE];
-            DatagramPacket dPacket = new DatagramPacket(receivedData, receivedData.length);
-            try (InputStreamReader isr = new InputStreamReader((UDPQuotesServer.class.getResourceAsStream(filename)))) {
-                br = new BufferedReader(isr);
+            DatagramPacket dPacket = new DatagramPacket(receivedData, BUFSIZE);
+            try (InputStreamReader isr = new InputStreamReader((UDPQuotesServer.class.getResourceAsStream(FILENAME)))) {
+                BufferedReader br = new BufferedReader(isr);
                 String line;
                 while (true) {
+
                     dSocket.receive(dPacket);
+                    System.out.println("Packet received");
                     InetAddress address = dPacket.getAddress();
                     int port = dPacket.getPort();
 

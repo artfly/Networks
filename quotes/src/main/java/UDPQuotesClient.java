@@ -8,12 +8,13 @@ import java.net.InetAddress;
  */
 public class UDPQuotesClient {
     private final static int BUFSIZE = 1024;
-    public final static String usage = "Usage : java UDPQuotesClient <hostname> <port>";
+    public final static String USAGE = "Usage : java UDPQuotesClient <hostname> <port>";
 
     public static void main(String[] args) {
 
         if (args.length < 2) {
-            System.err.println(usage);
+            System.err.println(USAGE);
+            return;
         }
 
         String host = args[0];
