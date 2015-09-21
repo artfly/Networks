@@ -49,7 +49,7 @@ func main() {
 			log.Println("Timeout")
 		} else {
 			elapsed := time.Since(start)
-			fmt.Printf("%6.6v\n", elapsed)
+			fmt.Printf("%3.4v\n", elapsed)
 		}
 	}
 }
