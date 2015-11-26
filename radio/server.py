@@ -30,13 +30,15 @@ class Station(threading.Thread):
         print(self.songs)
         while True:
             for f in self.songs:
-                time.sleep(10)
+                time.sleep(5)
                 with open(self.folder + '/' + f, 'rb') as song:
-                    data = song.read(1024)
-                    while data:
-                        self.sock.sendto(data, self.addr)
-                        data = song.read(1024)
-                        time.sleep(5)
+                    for line in song:
+                        self.sock.sendto(line, self.addr)
+                    # data = song.read(1024)
+                    # while data:
+                    #     self.sock.sendto(data, self.addr)
+                    #     data = song.read(1024)
+                    #     time.sleep(2)
 
 
 class RadioTCPHandler(socketserver.BaseRequestHandler):
