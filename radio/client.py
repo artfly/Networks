@@ -4,6 +4,7 @@ import threading
 import requests
 import sys
 import struct
+from time import sleep
 
 tcp_sock = None
 
@@ -17,6 +18,7 @@ def listen(sock):
     print("listen...")
     while True:
         try:
+            sleep(2)
             data = sock.recv(1024)
             print(data.decode("utf-8"))
         except OSError:
