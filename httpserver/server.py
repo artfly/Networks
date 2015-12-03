@@ -2,9 +2,43 @@ import socket
 import sys
 import os
 import time
+from threading import Thread
 
 ip = None
 port = None
+
+def send_response(conn, addr):
+	data = conn.recv(1024)
+	request = data.decode("utf-8").split(' ')
+	print(request)
+	if request[0] == 'GET':
+		requested_file = request[1].split('?')[0][1:]
+		if requested_file == '':
+			requested_file = '.'
+		try:
+			headers = gen_headers(200)
+			if os.path.isdir(requested_file):
+				print("Requested dir")
+				content = show_dir(requested_file).encode("utf-8")
+				response = headers.encode("utf-8") + content
+				conn.send(response)
+			else:
+				with open(requested_file, 'rb') as f:
+					response = headers.encode("utf-8")
+					conn.send(response)
+					# print(requested_file)
+					while True:
+						content = f.read(65536)
+						if len(content) == 0:
+							break
+						conn.send(content)
+		except FileNotFoundError as e:
+			headers = gen_headers(404)
+			content = b"<html><body><p>Error 404: File not found</p><p>Python HTTP server</p></body></html>"
+			response = headers.encode("utf-8") + content
+			conn.send(response)
+		print("Sending response..")
+		conn.close()
 
 def show_dir(path):
 	html = '<!DOCTYPE html>\n<html>\n<body>\n'
@@ -42,34 +76,6 @@ if __name__ == '__main__':
 	serversocket.listen(5)
 	while True:
 		conn, addr = serversocket.accept()
-		data = conn.recv(1024)
-		request = data.decode("utf-8").split(' ')
-		print(request)
-		if request[0] == 'GET':
-			requested_file = request[1].split('?')[0][1:]
-			if requested_file == '':
-				requested_file = '.'
-			try:
-				headers = gen_headers(200)
-				if os.path.isdir(requested_file):
-					print("Requested dir")
-					content = show_dir(requested_file).encode("utf-8")
-					response = headers.encode("utf-8") + content
-					conn.send(response)
-				else:
-					with open(requested_file, 'rb') as f:
-						response = headers.encode("utf-8")
-						conn.send(response)
-						# print(requested_file)
-						while True:
-							content = f.read(65536)
-							if len(content) == 0:
-								break
-							conn.send(content)
-			except FileNotFoundError as e:
-				headers = gen_headers(404)
-				content = b"<html><body><p>Error 404: File not found</p><p>Python HTTP server</p></body></html>"
-				response = headers.encode("utf-8") + content
-				conn.send(response)
-			print("Sending response..")
-			conn.close()
+		thread = Thread(target=send_response, args=(conn, addr))
+		thread.daemon = True
+		thread.start()
